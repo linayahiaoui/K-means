@@ -1,0 +1,55 @@
+from sklearn.cluster import KMeans
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+from matplotlib import pyplot as plt
+
+data = pd.read_csv('/content/challenge 3/heart_disease.csv')
+data = data.drop (['dataset'] , axis = 1)
+#transforming data to numeric data
+data['exang'] = data['exang'].replace({False: 0 , True : 1})
+data['fbs'] = data['fbs'].replace({False: 0 , True : 1})
+data['sex'] = data['sex'].replace({'Male': 1 , 'Female': 0})
+data['restecg'] = data['restecg'].replace({'normal': 0 , 'lv hypertrophy': 1 , 'st-t abnormality' : 2})
+data['cp'] = data['cp'].replace({'asymptomatic': 0 , 'non-anginal': 1 , 'atypical angina' : 2 ,'typical angina' : 3})
+data['sex'] = data['sex'].replace({'Male': 0 , 'Female': 1})
+data['restecg'] = data['restecg'].replace({'normal': 0 , 'lv hypertrophy': 1 , 'st-t abnormality' : 2})
+data['cp'] = data['cp'].replace({'asymptomatic': 1 , 'non-anginal': 2 , 'atypical angina' : 3 ,'typical angina' : 4})
+data.isna().sum()
+data = data.drop(['slope' ,'ca' , 'thal'] , axis = 1)
+#removing outliners
+data = data[data['trestbps'] != 0 ]
+data = data[data['trestbps'] <= 180 ]
+data = data[data['chol'] != 0 ]
+data = data[data['chol'] <= 400 ]
+data = data[data['thalch'] <= 200 ]
+plt.scatter(data['thalch'] , data['cp']  )
+
+
+# Select the features for clustering
+features = ['cp', 'sex', 'trestbps', 'chol', 'fbs', 'restecg', 'thalch']
+
+# Handle missing values
+data = data(strategy='mean')
+data_imputed = imputer.fit_transform(data[features])
+
+# Scale the features
+scaler = MinMaxScaler()
+data_scaled = scaler.fit_transform(data_imputed)
+
+# Perform K-means clustering
+k = 3  # Number of clusters
+kmeans = KMeans(n_clusters=k)
+kmeans.fit(data_scaled)
+cluster_labels = kmeans.labels_
+centroids = kmeans.cluster_centers_
+
+# Visualize the clusters
+fig = plt.figure(figsize=(10, 6))
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(data_scaled[:, 0], data_scaled[:, 2], data_scaled[:, 3], c=cluster_labels, cmap='viridis')
+ax.scatter(centroids[:, 0], centroids[:, 2], centroids[:, 3], marker='x', color='red', s=200)
+ax.set_xlabel('cp')
+ax.set_ylabel('trestbps')
+ax.set_zlabel('chol')
+ax.set_title('K-means Clustering')
+plt.show()
